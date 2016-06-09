@@ -7,7 +7,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#define SHMSIZE 20
+#define SHMSIZE 30
 
 int main(){
 	srand(time(NULL));
@@ -15,8 +15,7 @@ int main(){
 	struct timeval startTime, stopTime;
 	float timeMeasurement;
 	int shmid;
-	char *sharedMemory;
-	int sameCharacters=1;
+	int *sharedMemory;
 	int i;
 
 	gettimeofday(&startTime,NULL);
@@ -29,7 +28,7 @@ int main(){
 		exit(1);
 	}
 
-	sharedMemory = shmat(shmid, NULL, 0);
+	sharedMemory = (int*)shmat(shmid, NULL, 0);
 	
 	if(sharedMemory == NULL)
 	{
@@ -37,24 +36,16 @@ int main(){
 		exit(1);
 	}
 
-	for(i=0;;i++){
-		printf("%c",sharedMemory[i%SHMSIZE]);
+	for(i=0;i<SHMSIZE;i++){
+		printf("%d\n",sharedMemory[i]);
 		
-		if(sharedMemory[i%SHMSIZE] == sharedMemory[(i%SHMSIZE)-1]){
-			sameCharacters++;
-		}else{
-			sameCharacters=1;
-		}
-		
-		if(sameCharacters==5){
-				gettimeofday(&stopTime,NULL);
-				//sleep(1);
-				timeMeasurement = (stopTime.tv_sec - startTime.tv_sec)*1000 + (stopTime.tv_usec - startTime.tv_usec)/1000;
-				printf("\nDone! Found 5 similar characters.\nElapsed time: %.0f ms.", timeMeasurement);
-				exit(1);
-		}
 	}
-	//execlp("killall", "killall", NULL);
+	
+		gettimeofday(&stopTime,NULL);
+		//sleep(1);
+		timeMeasurement = (stopTime.tv_sec - startTime.tv_sec)*1000 + (stopTime.tv_usec - startTime.tv_usec)/1000;
+		printf("\nDone! Elapsed time: %.0f ms.\n", timeMeasurement);
+		exit(1);
 
 return EXIT_SUCCESS;
 }

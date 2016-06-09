@@ -6,24 +6,20 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
-#define SHMSIZE 20
+#define SHMSIZE 30
 
-
-char RandomizeCharacter(){
-	char randomCharacter;
-	randomCharacter = (rand()%50)+65;
-	return randomCharacter;
-}
 
 
 int main(){
 	srand(time(NULL));
 	key_t key = 2137;
 	int sharedMemoryID;
-	char *sharedMemory;
-	int i,index;
+	int *sharedMemory;
+	int i;
+	int a=1;
+	int q=2;
 
-	sharedMemoryID = shmget(key, SHMSIZE*sizeof(char), IPC_CREAT | 0666);
+	sharedMemoryID = shmget(key, SHMSIZE, IPC_CREAT | 0666);
 	
 	if(sharedMemoryID < 0)
 	{
@@ -31,7 +27,7 @@ int main(){
 		exit(1);
 	}
 
-	sharedMemory = shmat(sharedMemoryID, NULL, 0);
+	sharedMemory = (int*)shmat(sharedMemoryID, NULL, 0);
 	
 	if(sharedMemory == NULL)
 	{
@@ -39,9 +35,9 @@ int main(){
 		exit(1);
 	}
 
-	for(i=0;;i++){
-		index = i%SHMSIZE;
-		sharedMemory[index]=RandomizeCharacter();
+	for(i=0;i<SHMSIZE;i++){
+		a*=q;
+		sharedMemory[i]=a;
 	}
 	
 
