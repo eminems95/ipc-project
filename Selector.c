@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/time.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/ipc.h>
@@ -9,15 +10,18 @@
 #define SHMSIZE 20
 
 int main(){
-srand(time(NULL));
+	srand(time(NULL));
 	key_t key = 2137;
+	struct timeval startTime, stopTime;
+	float timeMeasurement;
 	int shmid;
 	char *sharedMemory;
-	char *text;
-	int sameCharacter=0;
+	int sameCharacters=1;
 	int i;
 
-	shmid = shmget(key, SHMSIZE, IPC_CREAT | 0666);
+	gettimeofday(&startTime,NULL);
+
+	shmid = shmget(key, SHMSIZE*sizeof(char), IPC_CREAT | 0666);
 	
 	if(shmid < 0)
 	{
@@ -27,7 +31,7 @@ srand(time(NULL));
 
 	sharedMemory = shmat(shmid, NULL, 0);
 	
-	if(sharedMemory == (char *) -1)
+	if(sharedMemory == NULL)
 	{
 		perror("Sharing memory segment error");
 		exit(1);
@@ -36,16 +40,21 @@ srand(time(NULL));
 	for(i=0;;i++){
 		printf("%c",sharedMemory[i%SHMSIZE]);
 		
-		if(sharedMemory[i%SHMSIZE] == sharedMemory[i%SHMSIZE-1]){
-			sameCharacter++;
+		if(sharedMemory[i%SHMSIZE] == sharedMemory[(i%SHMSIZE)-1]){
+			sameCharacters++;
 		}else{
-			sameCharacter=0;
+			sameCharacters=1;
 		}
 		
-		if(sameCharacter==5){
-				
+		if(sameCharacters==5){
+				gettimeofday(&stopTime,NULL);
+				//sleep(1);
+				timeMeasurement = (stopTime.tv_sec - startTime.tv_sec)*1000 + (stopTime.tv_usec - startTime.tv_usec)/1000;
+				printf("\nDone! Found 5 similar characters.\nElapsed time: %.0f ms.", timeMeasurement);
+				exit(1);
 		}
 	}
+	//execlp("killall", "killall", NULL);
 
-return 0;
+return EXIT_SUCCESS;
 }

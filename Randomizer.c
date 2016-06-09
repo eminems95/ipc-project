@@ -9,8 +9,9 @@
 #define SHMSIZE 20
 
 
-char RandomizeCharacter(char randomCharacter){
-	randomCharacter = (rand()%61)+65;
+char RandomizeCharacter(){
+	char randomCharacter;
+	randomCharacter = (rand()%50)+65;
 	return randomCharacter;
 }
 
@@ -20,11 +21,9 @@ int main(){
 	key_t key = 2137;
 	int sharedMemoryID;
 	char *sharedMemory;
-	char randomCharacter;
-	int sameCharacter=0;
-	int i;
+	int i,index;
 
-	sharedMemoryID = shmget(key, SHMSIZE, IPC_CREAT | 0666);
+	sharedMemoryID = shmget(key, SHMSIZE*sizeof(char), IPC_CREAT | 0666);
 	
 	if(sharedMemoryID < 0)
 	{
@@ -34,16 +33,17 @@ int main(){
 
 	sharedMemory = shmat(sharedMemoryID, NULL, 0);
 	
-	if(sharedMemory == (char *) -1)
+	if(sharedMemory == NULL)
 	{
 		perror("Sharing memory segment error");
 		exit(1);
 	}
 
 	for(i=0;;i++){
-		sharedMemory[i%SHMSIZE]=RandomizeCharacter(randomCharacter);
+		index = i%SHMSIZE;
+		sharedMemory[index]=RandomizeCharacter();
 	}
 	
 
-return 0;
+	return EXIT_SUCCESS;
 }
